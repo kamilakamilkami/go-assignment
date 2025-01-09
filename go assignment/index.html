@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golang MongoDB CRUD</title>
+    <script>
+        async function createUser() {
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+
+            const response = await fetch("/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email })
+            });
+
+            const result = await response.json();
+            alert(result.message || "User created successfully");
+            fetchUsers();
+        }
+
+        async function fetchUsers() {
+            const response = await fetch("/users");
+            const users = await response.json();
+
+            const tableBody = document.getElementById("userTableBody");
+            tableBody.innerHTML = "";
+            users.forEach(user => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${user._id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${new Date(user.createdAt).toLocaleString()}</td>
+                        <td>
+                            <button onclick="deleteUser('${user._id}')">Delete</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        async function deleteUser(id) {
+            const response = await fetch(`/delete/${id}`, { method: "DELETE" });
+            const result = await response.json();
+            alert(result.message || "User deleted successfully");
+            fetchUsers();
+        }
+
+        document.addEventListener("DOMContentLoaded", fetchUsers);
+    </script>
+</head>
+<body>
+    <h1>MongoDB User Management</h1>
+    <form onsubmit="event.preventDefault(); createUser();">
+        <input type="text" id="name" placeholder="Name" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <button type="submit">Add User</button>
+    </form>
+    <h2>User List</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+    </table>
+</body>
+</html>
