@@ -13,6 +13,7 @@ func Connect() *mongo.Client {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Подождите некоторое время для подключения к базе
 	err = client.Ping(context.Background(), nil)
 	if err != nil {
 		log.Fatal(err)

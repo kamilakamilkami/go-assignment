@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="profile.css">
+    <title>User Profile</title>
+</head>
+<body>
+    <header>
+        <h1>User Profile</h1>
+    </header>
+    <main>
+        
+        <section class="profile-section">
+            <h2>Manage Profile</h2>
+            <form id="update-profile-form">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="email" id="user-email" placeholder="Email" required>
+                <button type="submit">Update Profile</button>
+            </form>
+        </section> 
+
+        <!--Order History Section 
+        <section class="history-section">
+            <h2>Order History</h2>
+            <ul id="order-history"></ul>
+        </section>-->
+
+        <!-- Support Section --> 
+        <section class="support-section" enctype="multipart/form-data"> 
+            <h2>Contact Support</h2> 
+            <form id="support-form"> 
+                <input type="text" id="subject" name="subject" required placeholder="Your Subject"><br><br>
+                <textarea id="support-message" name="support-message" placeholder="Type your message here..." rows="5" required></textarea><br><br>
+                
+                <label for="attachment">Attach image:</label>
+                <input type="file" id="attachment" name="attachment" accept="image/*"><br><br>
+
+                <button type="submit">Send Message</button>
+            </form> 
+        </section> 
+
+    </main>
+    <footer>
+        <p>&copy; 2025 MedPortal</p>
+    </footer>
+    <script src="profile.js"></script>
+</body>
+</html>

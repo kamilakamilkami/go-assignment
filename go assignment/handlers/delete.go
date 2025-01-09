@@ -1,4 +1,3 @@
-// handlers/delete.go
 package handlers
 
 import (

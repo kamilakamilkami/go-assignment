@@ -1,0 +1,13 @@
+{"level":"info","msg":"Log initialization successful.","time":"2025-01-08T17:16:31+06:00"}
+{"level":"warning","msg":"This is a warning log.","time":"2025-01-08T17:16:31+06:00"}
+{"level":"error","msg":"This is an error log.","time":"2025-01-08T17:16:31+06:00"}
+{"action":"get patients","filter":"","level":"info","msg":"User action logged","page":"1","sort":"","time":"2025-01-08T17:53:44+06:00","timestamp":"2025-01-08T17:53:44+06:00","user_id":"1"}
+{"action":"get patients","filter":"","level":"info","msg":"User action logged","page":"1","sort":"","time":"2025-01-08T17:53:47+06:00","timestamp":"2025-01-08T17:53:47+06:00","user_id":"1"}
+{"action":"get patients","filter":"","level":"info","msg":"User action logged","page":"1","sort":"","time":"2025-01-08T17:53:59+06:00","timestamp":"2025-01-08T17:53:59+06:00","user_id":"1"}
+{"action":"get patients","filter":"","level":"info","msg":"User action logged","page":"1","sort":"","time":"2025-01-08T18:32:35+06:00","timestamp":"2025-01-08T18:32:35+06:00","user_id":"1"}
+{"action":"get patients","filter":"","level":"info","msg":"User action logged","page":"1","sort":"","time":"2025-01-08T18:33:07+06:00","timestamp":"2025-01-08T18:33:07+06:00","user_id":"1"}
+{"action":"get patients","filter":"","level":"info","msg":"User action logged","page":"1","sort":"","time":"2025-01-08T18:33:27+06:00","timestamp":"2025-01-08T18:33:27+06:00","user_id":"1"}
+{"action":"get patients","filter":"","level":"info","msg":"User action logged","page":"1","sort":"","time":"2025-01-08T18:34:12+06:00","timestamp":"2025-01-08T18:34:12+06:00","user_id":"1"}
+{"action":"get patients","filter":"","level":"info","msg":"User action logged","page":"1","sort":"","time":"2025-01-08T18:37:54+06:00","timestamp":"2025-01-08T18:37:54+06:00","user_id":"1"}
+{"action":"get patients","filter":"","level":"info","msg":"User action logged","page":"1","sort":"","time":"2025-01-08T18:46:13+06:00","timestamp":"2025-01-08T18:46:13+06:00","user_id":"1"}
+{"action":"get patients","filter":"","level":"info","msg":"User action logged","page":"1","sort":"","time":"2025-01-08T18:46:17+06:00","timestamp":"2025-01-08T18:46:17+06:00","user_id":"1"}
