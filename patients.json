@@ -1,0 +1,68 @@
+[{
+  "_id": {
+    "$oid": "677904f2e05f1f9f903c39f3"
+  },
+  "name": "Jane Smith",
+  "email": "jane@example.com",
+  "role": "user"
+},
+{
+  "_id": {
+    "$oid": "677e383fbe51c02cdfb7c2e4"
+  },
+  "name": "Nurlybayeva Kamila",
+  "email": "230283@astanait.edu.kz",
+  "phone": "+7 (771) 460 71 82",
+  "address": "abulkhairkhana 58",
+  "role": "admin"
+},
+{
+  "_id": {
+    "$oid": "677e6598ca40951b177344e5"
+  },
+  "name": "jseee sjjsj",
+  "email": "ibrayevaiqyn@gmail.com",
+  "phone": "+7-(771)-460-71-82",
+  "address": "dfsgar",
+  "role": ""
+},
+{
+  "_id": {
+    "$oid": "677e708321204d6469fd5417"
+  },
+  "name": "kammmmmila",
+  "email": "230619@astanait.edu.kz",
+  "phone": "+7 (771) 460 71 82",
+  "address": "dnjjdj",
+  "role": ""
+},
+{
+  "_id": {
+    "$oid": "677e739521204d6469fd5418"
+  },
+  "name": "Кәмилә",
+  "email": "ibrayevaiqyn@gmail.com",
+  "phone": "+7-(771)-460-71-82",
+  "address": "dfsgar",
+  "role": ""
+},
+{
+  "_id": {
+    "$oid": "67866874324804643adc9b53"
+  },
+  "name": "liya",
+  "email": "liya@gmail.com",
+  "phone": ".222665652",
+  "address": "abylkhair",
+  "role": ""
+},
+{
+  "_id": {
+    "$oid": "67896b17cd424ac161b21a6f"
+  },
+  "name": "Nurlybayeva Kamila",
+  "email": "230283@astanait.edu.kz",
+  "phone": "+7-(771)-460-71-82",
+  "address": "abulkhairkhana 58",
+  "role": ""
+}]

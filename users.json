@@ -1,0 +1,80 @@
+[{
+  "_id": {
+    "$oid": "678f550179b5b5cc93126d2d"
+  },
+  "name": "",
+  "email": "alisherdautov22@gmail.com",
+  "password": "abab",
+  "code": "0623",
+  "role": "admin"
+},
+{
+  "_id": {
+    "$oid": "678f8497bfbb6ae81b05f4dc"
+  },
+  "name": "",
+  "email": "nurlybayevakamila@gmail.com",
+  "password": "123345",
+  "code": "4698",
+  "role": "user"
+},
+{
+  "_id": {
+    "$oid": "678f8499bfbb6ae81b05f4dd"
+  },
+  "name": "",
+  "email": "nurlybayevakamila@gmail.com",
+  "password": "123345",
+  "code": "5778",
+  "role": "not verified"
+},
+{
+  "_id": {
+    "$oid": "678f8499bfbb6ae81b05f4de"
+  },
+  "name": "",
+  "email": "nurlybayevakamila@gmail.com",
+  "password": "123345",
+  "code": "1084",
+  "role": "not verified"
+},
+{
+  "_id": {
+    "$oid": "678f849abfbb6ae81b05f4df"
+  },
+  "name": "",
+  "email": "nurlybayevakamila@gmail.com",
+  "password": "123345",
+  "code": "9824",
+  "role": "not verified"
+},
+{
+  "_id": {
+    "$oid": "678f849abfbb6ae81b05f4e0"
+  },
+  "name": "",
+  "email": "nurlybayevakamila@gmail.com",
+  "password": "123345",
+  "code": "0148",
+  "role": "not verified"
+},
+{
+  "_id": {
+    "$oid": "678f849abfbb6ae81b05f4e1"
+  },
+  "name": "",
+  "email": "nurlybayevakamila@gmail.com",
+  "password": "123345",
+  "code": "9501",
+  "role": "not verified"
+},
+{
+  "_id": {
+    "$oid": "678f849abfbb6ae81b05f4e2"
+  },
+  "name": "",
+  "email": "nurlybayevakamila@gmail.com",
+  "password": "123345",
+  "code": "5751",
+  "role": "not verified"
+}]

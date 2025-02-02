@@ -19,7 +19,9 @@ import (
   "io"
   "fmt"
   "net/smtp"
-
+  "math/rand"
+  "med_portal/patient"
+	"med_portal/svc"
 )
 
 var client *mongo.Client
@@ -34,7 +36,14 @@ type Patient struct {
   Role string             `json:"role" bson:"role"`
   }
   
-
+type RegisterForm struct {
+    Name    string             `json:"name" bson:"name"`
+    Email   string             `json:"email" bson:"email"`
+    Password string            `json:"password" bson:"password"`
+    Code   string             `json:"code" bson:"code"`
+    Role string            `json:"role" bson:"role"`
+    
+}
 func main() {
 
   logs := logrus.New()
@@ -77,16 +86,21 @@ func main() {
 	})
   router.HandleFunc("/delete-patient/{id}", deletePatientHandler).Methods("DELETE")
   router.HandleFunc("/update-patient/{id}", updatePatientHandler).Methods("PUT")
-  router.HandleFunc("/search-patients", searchPatientsHandler).Methods("GET")
-  // I added
+  router.HandleFunc("/search-patients", patient.SearchPatientsHandler).Methods("GET")
   router.HandleFunc("/send-email", sendEmailGet).Methods("GET")
   router.HandleFunc("/send-support-message", sendEmailPost).Methods("POST")
+  
+  router.HandleFunc("/register", registerGet).Methods("GET")
+  router.HandleFunc("/register", registerPost).Methods("POST")
+  router.HandleFunc("/verify", VerifyCode).Methods("POST")
+  router.HandleFunc("/login", Login).Methods("POST")
+  router.HandleFunc("/getrole", GetRole).Methods("POST")
 
   // Enable CORS
   corsHandler := cors.New(cors.Options{
-    AllowedOrigins:   []string{"http://127.0.0.1:5502", "http://localhost:5502", "http://127.0.0.1:5500", "http://localhost:5500"},
+    AllowedOrigins:   []string{"http://127.0.0.1:5502", "http://localhost:5502", "http://127.0.0.1:5501", "http://localhost:5501"},
     AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-    AllowedHeaders:   []string{"Content-Type", "Authorization"},
+    AllowedHeaders:   []string{"Content-Type", "Authorization", "Set-Cookie"},
     AllowCredentials: true,
   })
 
@@ -97,6 +111,151 @@ func main() {
 func sendEmailGet(w http.ResponseWriter, r *http.Request) {
 
 }
+
+func registerGet(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func Login(w http.ResponseWriter, r *http.Request) {
+  var data map[string]string
+  decoder := json.NewDecoder(r.Body)
+  err := decoder.Decode(&data)
+  if err != nil {
+      http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+      return
+  }
+
+  email, password := data["email"], data["password"]
+  user, err := ExistUser(client, "med_portal", "users", email, password)
+  if err != nil {
+    http.Error(w, "NO such user", http.StatusBadRequest)
+    return
+  }
+  tokenString, err := svc.CreateToken(user.Email, user.Password, user.Role)
+  if err != nil {
+      http.Error(w, "Error creating token", http.StatusInternalServerError)
+      return
+  }
+  SetAuthCookie(w, tokenString)
+
+  // Send the token in the response body
+  w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(map[string]interface{}{
+      "token": tokenString,  // Send the JWT token
+  })
+}
+
+func GetRole(w http.ResponseWriter, r *http.Request) {
+  token := r.Header.Get("Authorization")
+  if token == "" {
+      http.Error(w, "Authorization token is missing", http.StatusUnauthorized)
+      return
+  }
+  err := svc.VerifyToken(token)
+  if err != nil {
+    http.Error(w, "Token is not verified", http.StatusBadRequest)
+    return
+  }
+  role, _ := svc.GetClaim(token, "role")
+  fmt.Println(role)
+  w.Header().Set("Content-Type", "application/json")
+      json.NewEncoder(w).Encode(map[string]interface{}{
+          "role": role,  
+      })
+}
+
+func registerPost(w http.ResponseWriter, r *http.Request) {
+  var register RegisterForm
+  register.Role = "not verified"
+  register.Code = GenerateRandomCode(4)
+  if err := json.NewDecoder(r.Body).Decode(&register); err != nil {
+    http.Error(w, "Invalid request payload", http.StatusBadRequest)
+    return
+  }
+
+  CreateUser(client, context.TODO(), "med_portal", "users", register)
+  SendEmail("Your Verification Code", register.Code, register.Email)
+
+  tokenString, err := svc.CreateToken(register.Email, register.Password, register.Role)
+  if err != nil {
+    http.Error(w, "Error creating token", http.StatusInternalServerError)
+    return
+  }
+
+  SetAuthCookie(w, tokenString)
+  w.Header().Set("Authorization", tokenString)
+  w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(map[string]interface{}{
+      "token": tokenString, // Send the JWT token
+  })
+
+}
+
+func VerifyCode(w http.ResponseWriter, r *http.Request) {
+  token := r.Header.Get("Authorization")
+  if token == "" {
+      http.Error(w, "Authorization token is missing", http.StatusUnauthorized)
+      return
+  }
+  email, _ := svc.GetClaim(token, "email")
+  password, _ := svc.GetClaim(token, "password")
+  user, _ := ExistUser(client, "med_portal", "users", email, password)
+
+  var data map[string]string
+  decoder := json.NewDecoder(r.Body)
+  err := decoder.Decode(&data)
+  if err != nil {
+      http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+      return
+  }
+
+  code := data["code"]
+  if user.Code == code {
+      tokenString, err := svc.CreateToken(user.Email, user.Password, "user")
+      if err != nil {
+          http.Error(w, "Error creating token", http.StatusInternalServerError)
+          return
+      }
+
+      updateRole(client, context.TODO(), "med_portal", "users", user, "user")
+      SetAuthCookie(w, tokenString)
+
+      // Send the token in the response body
+      w.Header().Set("Content-Type", "application/json")
+      json.NewEncoder(w).Encode(map[string]interface{}{
+          "token": tokenString,  // Send the JWT token
+      })
+      return
+  }
+
+  http.Error(w, "Invalid verification code", http.StatusUnauthorized)
+}
+
+
+func ExistUser(client *mongo.Client, database, collection, email, password string) (RegisterForm, error) {
+	user := GetUsers(client, database, collection, bson.M{"email": email, "password": password}, bson.D{})
+	if len(user) != 0 {
+		return user[0], nil
+	}
+	return RegisterForm{}, fmt.Errorf("NO user")
+}
+
+
+func GenerateRandomCode(length int) string {
+	if length <= 0 {
+		return ""
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	code := ""
+	for i := 0; i < length; i++ {
+		code += fmt.Sprintf("%d", rand.Intn(10)) // Append a random digit (0-9)
+	}
+	return code
+}
+
+
+
 
 func sendEmailPost(w http.ResponseWriter, r *http.Request) {
   // Parse multipart form data
@@ -203,7 +362,26 @@ func SendEmail(subject, message string, recipient string) error {
 
 // nothing
 
-
+func deletePatientHandler(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+	  http.Error(w, "Invalid ObjectID", http.StatusBadRequest)
+	  return
+	}
+  
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+  
+	_, err = collection.DeleteOne(ctx, bson.M{"_id": objID})
+	if err != nil {
+	  http.Error(w, "Failed to delete patient", http.StatusInternalServerError)
+	  return
+	}
+  
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Patient deleted successfully"})
+  }
 
 func getPatientsHandler(w http.ResponseWriter, r *http.Request, logs *logrus.Logger) {
   filter := r.URL.Query().Get("filter")
@@ -256,45 +434,8 @@ func getPatientsHandler(w http.ResponseWriter, r *http.Request, logs *logrus.Log
 }
 
 
-func addPatientHandler(w http.ResponseWriter, r *http.Request) {
-  var patient Patient
-  if err := json.NewDecoder(r.Body).Decode(&patient); err != nil {
-    http.Error(w, "Invalid request payload", http.StatusBadRequest)
-    return
-  }
 
-  ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-  defer cancel()
 
-  result, err := collection.InsertOne(ctx, patient)
-  if err != nil {
-    http.Error(w, "Failed to add patient", http.StatusInternalServerError)
-    return
-  }
-
-  w.Header().Set("Content-Type", "application/json")
-  json.NewEncoder(w).Encode(result)
-}
-func deletePatientHandler(w http.ResponseWriter, r *http.Request) {
-  id := mux.Vars(r)["id"]
-  objID, err := primitive.ObjectIDFromHex(id)
-  if err != nil {
-    http.Error(w, "Invalid ObjectID", http.StatusBadRequest)
-    return
-  }
-
-  ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-  defer cancel()
-
-  _, err = collection.DeleteOne(ctx, bson.M{"_id": objID})
-  if err != nil {
-    http.Error(w, "Failed to delete patient", http.StatusInternalServerError)
-    return
-  }
-
-  w.Header().Set("Content-Type", "application/json")
-  json.NewEncoder(w).Encode(map[string]string{"message": "Patient deleted successfully"})
-}
 
 func updatePatientHandler(w http.ResponseWriter, r *http.Request) {
   id := mux.Vars(r)["id"]
@@ -324,33 +465,24 @@ func updatePatientHandler(w http.ResponseWriter, r *http.Request) {
   json.NewEncoder(w).Encode(map[string]string{"message": "Patient updated successfully"})
 }
 
-func searchPatientsHandler(w http.ResponseWriter, r *http.Request) {
-  query := r.URL.Query().Get("name")
-  if query == "" {
-    http.Error(w, "Missing search query", http.StatusBadRequest)
-    return
-  }
-
-  ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-  defer cancel()
-
-  cursor, err := collection.Find(ctx, bson.M{"name": bson.M{"$regex": query, "$options": "i"}})
-  if err != nil {
-    http.Error(w, "Failed to search patients", http.StatusInternalServerError)
-    return
-  }
-  defer cursor.Close(ctx)
-
+func addPatientHandler(w http.ResponseWriter, r *http.Request) {
+	var patient Patient
+	if err := json.NewDecoder(r.Body).Decode(&patient); err != nil {
+	  http.Error(w, "Invalid request payload", http.StatusBadRequest)
+	  return
+	}
   
-
-  var patients []Patient
-  if err := cursor.All(ctx, &patients); err != nil {
-    http.Error(w, "Failed to decode search results", http.StatusInternalServerError)
-    return
-  }
-
-  w.Header().Set("Content-Type", "application/json")
-  json.NewEncoder(w).Encode(patients)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+  
+	result, err := collection.InsertOne(ctx, patient)
+	if err != nil {
+	  http.Error(w, "Failed to add patient", http.StatusInternalServerError)
+	  return
+	}
+  
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
 }
 
 func LogUserAction(log *logrus.Logger, action string, userID string, page string, additionalFields map[string]interface{}) {
@@ -371,4 +503,68 @@ func LogUserAction(log *logrus.Logger, action string, userID string, page string
 
 	// Log the action
 	entry.Info("User action logged")
+}
+
+func CreateUser(client *mongo.Client, ctx context.Context, dataBase, col string, user RegisterForm) (*mongo.InsertOneResult, error) {
+	collection := client.Database(dataBase).Collection(col)
+  result, err := collection.InsertOne(ctx, user)
+  return result, err
+}
+
+func SetAuthCookie(w http.ResponseWriter, tokenString string) {
+  cookie := &http.Cookie{
+      Name:     "auth_token",
+      Value:    tokenString,
+      HttpOnly: true,
+      Path:     "/",
+      Expires:  time.Now().Add(24 * time.Hour),
+      SameSite: http.SameSiteStrictMode, 
+  }
+  fmt.Println("Setting auth_token cookie:", cookie)
+  http.SetCookie(w, cookie)
+}
+
+
+
+
+
+func GetUsers(client *mongo.Client, database, collection string, filter bson.M, sorting bson.D) []RegisterForm {
+  coll := client.Database(database).Collection(collection)
+
+  findOptions := options.Find().SetSort(sorting)
+
+  cursor, err := coll.Find(context.TODO(), filter, findOptions)
+  if err != nil {
+      panic(err)
+  }
+
+  var users []RegisterForm
+  if err := cursor.All(context.TODO(), &users); err != nil {
+      panic(err)
+  }
+
+  return users
+}
+
+func updateRole(client *mongo.Client, ctx context.Context, dataBase, col string, user RegisterForm, role string) error {
+	collection := client.Database(dataBase).Collection(col)
+	filter := bson.D{{"email", user.Email}, {"password", user.Password}}
+	update := bson.D{
+		{"$set", bson.D{
+			{"role", role},
+		}},
+	}
+	result, err := collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		fmt.Println("failed to update product")
+		return err
+	}
+
+	// Check if the product was found and updated
+	if result.MatchedCount == 0 {
+		return err
+	}
+
+	fmt.Printf("Successfully updated %d user's role\n", result.ModifiedCount)
+	return nil
 }

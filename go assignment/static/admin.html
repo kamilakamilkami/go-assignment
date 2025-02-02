@@ -4,25 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style.css">
-    <title>Document</title>
+    <title>User Roles Management</title>
 </head>
 
 <body>
-    <h1>Patient Management</h1>
-
-    <!-- Add Patient Form -->
-    <form id="add-patient-form" method="POST">
-        <input type="text" id="name" placeholder="Name" required>
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="text" id="phone" placeholder="Phone" required>
-        <input type="text" id="address" placeholder="Address" required>
-        <button type="submit">Add Patient</button>
-    </form>
-
+    <h1>User Roles Management</h1>
+    
     <!-- Filter and Sort Form -->
     <form id="filter-form">
-        <label for="filter">Filter:</label>
+        <label for="filt3er">Filter Users:</label>
         <input type="text" id="filter" placeholder="Enter name filter">
+
+        <label for="role-filter">Filter by Role:</label>
+        <select id="role-filter">
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+        </select>
 
         <label for="sort">Sort:</label>
         <select id="sort">
@@ -36,16 +34,13 @@
 
     <!-- Search -->
     <input type="text" id="search" placeholder="Search by name">
-    <button onclick="searchPatients()">Search</button>
+    <button onclick="searchUsers()">Search</button>
 
-    <!-- Patient List -->
-    <ul id="patient-list"></ul>
+    <!-- User List -->
+    <ul id="user-list"></ul>
 
     <!-- Pagination -->
-    <div id="pagination"></div> 
-    <script src="admin.js"></script>
-
+    <div id="pagination"></div>
     <script src="script.js"></script>
 </body>
 </html>
-
